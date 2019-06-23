@@ -3,20 +3,25 @@ import 'dart:async';
 import 'dart:io';
 import '../config/service_url.dart';
 
-//获取首页主题内容
-Future getHomePageContent() async {
+// 商城获取数据请求 需要带上经纬度参数
+const Map defaultFormData = {"lon": "115.02932", "lat": "35.76189"};
+
+//获取首页内容
+Future postRequest(String url,{Map formData}) async {
+  Response response;
+  Dio dio = Dio();
   try {
-    Response response;
-    Dio dio = Dio();
-    dio.options.contentType =
-        ContentType.parse("application/x-www-form-urlencoded");
-    var formData = {"lon": "115.02932", "lat": "35.76189"};
-    response = await dio.post(servicePath["homePageContent"], data: formData);
-    if (response.statusCode == 200) {
-      return response.data;
-    } else {
-      throw new Exception("调用首页内容接口出现异常");
+    print("开始调用接口获取数据,url=$url,formData=$formData");
+    dio.options.contentType = ContentType.parse("application/x-www-form-urlencoded");
+    if(formData == null){
+      response = await dio.post(servicePath[url]);
+    }else{
+      response = await dio.post(servicePath[url], data: formData);
     }
+    if (response.statusCode != 200) {
+      throw new Exception("调用接口出现异常,url=$url,formData=$formData");
+    }
+    return response.data;
   } catch (e) {
     return print("ERROR===========>$e");
   }
