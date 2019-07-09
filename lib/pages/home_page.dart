@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../service/service_method.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
+import '../router/application.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -21,7 +22,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
   @override
   bool get wantKeepAlive => true;
 
-  GlobalKey<RefreshFooterState> footerKey = GlobalKey<RefreshFooterState>();
+  GlobalKey<RefreshFooterState> _footerKey = GlobalKey<RefreshFooterState>();
 
   @override
   void initState() {
@@ -70,7 +71,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
             List<Map> floor3 = (data['floor3'] as List).cast();
             return EasyRefresh(
               refreshFooter: ClassicsFooter(
-                key: footerKey,
+                key: _footerKey,
                 bgColor: Colors.white,
                 textColor: Colors.pink,
                 moreInfoColor: Colors.pink,
@@ -169,6 +170,9 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
             ],
           ),
         ),
+        onTap: (){
+          Application.router.navigateTo(context, "/detail?goodsId=${item['goodsId']}");
+        },
       );
     }).toList();
 
@@ -206,7 +210,12 @@ class SwiperDiy extends StatelessWidget {
       child: Swiper(
         itemCount: swiperDataList.length,
         itemBuilder: (BuildContext context, int index){
-          return Image.network(swiperDataList[index]["image"], fit: BoxFit.fill,);
+          return InkWell(
+            child: Image.network(swiperDataList[index]["image"], fit: BoxFit.fill,),
+            onTap: (){
+              Application.router.navigateTo(context, "/detail?goodsId=${swiperDataList[index]['goodsId']}");
+            },
+          );
         },
         pagination: SwiperPagination(),
         autoplay: true,
@@ -345,9 +354,11 @@ class Recommend extends StatelessWidget {
     );
   }
 
-  Widget _recommentItem(index){
+  Widget _recommentItem(index,context){
     return InkWell(
-      onTap: (){},
+      onTap: (){
+        Application.router.navigateTo(context, "/detail?goodsId=${recommendList[index]['goodsId']}");
+      },
       child: Container(
         width: ScreenUtil.screenWidthDp/3,
         decoration: BoxDecoration(
@@ -381,7 +392,7 @@ class Recommend extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: recommendList.length,
         itemBuilder: (context,index){
-          return _recommentItem(index);
+          return _recommentItem(index,context);
         }
       ),
     );
@@ -415,30 +426,33 @@ class Floor extends StatelessWidget {
   }
 
   // 楼层商品单项
-  Widget _goodsItemWidget(item,{width,height}){
+  Widget _goodsItemWidget(context,item,{width,height}){
     height = height != null ? ScreenUtil().setHeight(height) : height;
     width = width ?? (ScreenUtil.screenWidthDp/2);
     return InkWell(
       child: Image.network(item["image"],width: width,height: height,),
+      onTap: (){
+        Application.router.navigateTo(context, "/detail?goodsId=${item['goodsId']}");
+      },
     );
   }
 
   // 楼层商品列表
-  Widget _goodsListWidget(){
+  Widget _goodsListWidget(context){
     return Container(
       child: Row(
         children: <Widget>[
           Column(
             children: <Widget>[
-              _goodsItemWidget(floorGoodsList[0],height: 400.0),
-              _goodsItemWidget(floorGoodsList[3],height: 200.0),
+              _goodsItemWidget(context,floorGoodsList[0],height: 400.0),
+              _goodsItemWidget(context,floorGoodsList[3],height: 200.0),
             ],
           ),
           Column(
             children: <Widget>[
-              _goodsItemWidget(floorGoodsList[1],height: 200.0),
-              _goodsItemWidget(floorGoodsList[2],height: 200.0),
-              _goodsItemWidget(floorGoodsList[4],height: 200.0),
+              _goodsItemWidget(context,floorGoodsList[1],height: 200.0),
+              _goodsItemWidget(context,floorGoodsList[2],height: 200.0),
+              _goodsItemWidget(context,floorGoodsList[4],height: 200.0),
             ],
           ),
         ],
@@ -453,7 +467,7 @@ class Floor extends StatelessWidget {
       child: Column(
         children: <Widget>[
           _titleWidget(),
-          _goodsListWidget()
+          _goodsListWidget(context)
         ],
       ),
     );
